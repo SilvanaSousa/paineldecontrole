@@ -1,4 +1,9 @@
 <?php
+
+    session_start();
+    if(!$_SESSION['nome']){
+        header('Location: login.php');
+    }
     require('connection.php');
 
     $conectar = conectar();
@@ -17,7 +22,7 @@
 
     }
 
-    if(isset($_POST['salvar_sobre']))
+    else if(isset($_POST['salvar_sobre']))
     {
 
         $sobre = $_POST["codigo_html"];
@@ -27,6 +32,13 @@
         $conexao_equipe->execute(array(null,$sobre));
         
 
+    }
+    else if(isset($_POST['delete_equipe'])){
+        $id_excluido = $_POST['id_excluido'];
+        $query_para_deletar_equipe = "DELETE FROM equipe WHERE id = ?";
+        $preparando_query_para_excluir = $conectar->prepare($query_para_deletar_equipe);
+        $preparando_query_para_excluir->execute(array($id_excluido));
+        header("Location:index.php");
     }
 
 
@@ -69,11 +81,18 @@
                     </li>
                 </ul>
                 <ul class=" nav navbar-nav navbar-right">
-                        <li><a href="?sair"><span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-x" viewBox="0 0 16 16">
-                        <path d="M7.293 1.5a1 1 0 0 1 1.414 0L11 3.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3.293l2.354 2.353a.5.5 0 0 1-.708.708L8 2.207l-5 5V13.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 2 13.5V8.207l-.646.647a.5.5 0 1 1-.708-.708z"/>
-                        <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m-.646-4.854.646.647.646-.646a.5.5 0 0 1 .708.707l-.647.646.647.646a.5.5 0 0 1-.708.708l-.646-.647-.646.647a.5.5 0 0 1-.708-.707l.647-.647-.647-.646a.5.5 0 0 1 .708-.707Z"/>
-                        </svg></span>Sair</a></li>
-                    </ul>
+                    <li>
+                        <?=$_SESSION['nome']?>
+                        <a href="logout.php">
+                            <span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-x" viewBox="0 0 16 16">
+                                    <path d="M7.293 1.5a1 1 0 0 1 1.414 0L11 3.793V2.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v3.293l2.354 2.353a.5.5 0 0 1-.708.708L8 2.207l-5 5V13.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 2 13.5V8.207l-.646.647a.5.5 0 1 1-.708-.708z"/>
+                                    <path d="M12.5 16a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7m-.646-4.854.646.647.646-.646a.5.5 0 0 1 .708.707l-.647.646.647.646a.5.5 0 0 1-.708.708l-.646-.647-.646.647a.5.5 0 0 1-.708-.707l.647-.647-.647-.646a.5.5 0 0 1 .708-.707Z"/>
+                                </svg>
+                            </span>Sair
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
         </nav>
@@ -85,7 +104,7 @@
                     <h2><span><i class="bi bi-gear-fill"></i></span>Painel de controle</h2>
                     </div>
                     <div class="col-md-3">
-                        <p>Seu ultimo login foi em: 12/06/2023</p>
+                        <p>Seu ultimo login foi em: <?= $_SESSION['ultimo_login']?></p>
                     </div>
                 </div>
             </div>
@@ -182,8 +201,12 @@
                                 <tr>
                                     <td><?php echo $value['id']?></td>
                                     <td><?= $value['nome'] ?></td>
-                                    <td><button type="button" class="btn btn-danger"><i class="bi bi-trash3-fill"></i>Excluir</button></td>
-                                    
+                                    <td>
+                                        <form method="post">
+                                            <input type="hidden" name="id_excluido" value="<?= $value['id'] ?>"/>
+                                            <button type="submit" class="btn btn-danger" name="delete_equipe"><i class="bi bi-trash3-fill"></i> Excluir</button>
+                                        </form>
+                                    </td>
                                 </tr>
                                 <?php } ?>
                             </tbody>
